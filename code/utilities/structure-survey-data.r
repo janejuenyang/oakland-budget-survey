@@ -281,7 +281,7 @@ elongate_survey_data <- function(df) {
     # reshape into three columns (timestamp, question, response)
     df_long <- df %>%
         pivot_longer(
-            cols = c(-timestamp, -respondent_id),
+            cols = c(-timestamp, -respondent_id, -district),
             names_to = "question", 
             values_to = "response"
         )
