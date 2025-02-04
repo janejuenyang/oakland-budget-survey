@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: structure survey data for easy analysis
-# last edited: jan 19, 2025
+# last edited: feb 3, 2025
 ################################################################################
 
 #' @title Extract question number from survey column name
@@ -269,7 +269,7 @@ separate_multi_select <- function(df, col, options) {
 #' @title Reshape survey data from wide to long format
 #' #' @description
 #' Given a dataframe of survey data in wide format, pivot into long format
-#' with the columns `response_id`, `timestamp`, `question`, `response`
+#' with the columns `respondent_id`, `timestamp`, `question`, `response`
 #' @param df A dataframe
 #' @returns Survey data in long format
 elongate_survey_data <- function(df) {
@@ -281,7 +281,7 @@ elongate_survey_data <- function(df) {
     # reshape into three columns (timestamp, question, response)
     df_long <- df %>%
         pivot_longer(
-            cols = c(-timestamp, -response_id),
+            cols = c(-timestamp, -respondent_id),
             names_to = "question", 
             values_to = "response"
         )
@@ -417,7 +417,7 @@ map_en_responses <- function(df, language_code = c("en", "es", "zh")) {
 #'
 #' @return A dataframe in long format with columns:
 #'   \itemize{
-#'     \item response_id: Unique identifier for each response
+#'     \item respondent_id: Unique identifier for each respondent
 #'     \item timestamp: Time the response was recorded
 #'     \item question: Question identifier (q1, q2, etc.)
 #'     \item response: Original response text
@@ -495,7 +495,7 @@ preprocess_survey_data <- function(
     
     # create response IDs and standardize districts
     df_processed <- df_renamed %>% 
-        mutate(response_id = create_id(
+        mutate(respondent_id = create_id(
             prefix = language_code,
             row_number = row_number()
         )) %>%
@@ -538,15 +538,26 @@ preprocess_survey_data <- function(
         }
         
         # process each multi-select question sequentially
-        df_res <- reduce2(
+        df_multi <- reduce2(
             .x = names(multi_select_qids),
             .y = multi_select_qids,
             .f = process_one_question,
             .init = df_translated
         )
     } else {
-        df_res <- df_translated
+        df_multi <- df_translated
     }
+    
+    # add a response id that is unique to each row in restructured data
+    df_res <- df_multi %>%
+        group_by(respondent_id) %>%
+        mutate(response_id = paste(
+            respondent_id, 
+            question, 
+            row_number(), 
+            sep = "-")
+        ) %>%
+        ungroup()
     
     # return processed data
     return(df_res)
