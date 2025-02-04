@@ -1,0 +1,102 @@
+question,r_en,r_es,r_zh
+q1,Yes,Sí,是的
+q1,No,No,不是
+q2,Excellent,Excelente,出色的
+q2,Good,Bueno,好的
+q2,Fair,Aceptable,一般
+q2,Poor,Malo,差的
+q3,Strongly approve,Lo apruebo firmemente,强烈赞同
+q3,Somewhat approve,Un poco aprobar,有些赞同
+q3,Somewhat disapprove,Un poco desapruebo,有些不赞同
+q3,Strongly disapprove,Desapruebo firmemente,强烈不赞同
+q5,Clean and well-maintained streets,Calles limpias y bien mantenidas,街道干净且维护良好
+q5,Affordable housing,Vivienda asequible,负担得起的住房
+q5,Affordable and healthy food,Comida asequible y saludable,实惠又健康的食物
+q5,Accessible after-school programs and other youth programming,Programas extraescolares accesibles y otros programas para jóvenes,方便的课后活动和其他青少年活动
+q5,Feeling safe when walking and/or leaving my car alone,Sentirse seguro al caminar y / o dejar mi auto solo,步行和/或把车停在一边时感到安全
+q5,Timely and effective emergency responders,Respondedores de emergencia oportunos y efectivos,及时有效的应急响应人员
+q5,Vibrant arts and culture scene,Vibrante escena artística y cultural,充满活力的艺术和文化场景
+q5,Robust small business economy,Economía robusta de pequeñas empresas,小型企业经济强劲
+q5,Other,Other,Other
+q6,Reduced public safety resources,Reducción de recursos de seguridad pública,公共安全资源减少
+q6,"Reduced maintenance (e.g. more potholes, more vandalism, more illegal dumping, reduced cleanliness, reduced sidewalk and bike accessibility)","Mantenimiento reducido (por ejemplo, más baches, más vandalismo, más vertidos ilegales, menor limpieza, menor accesibilidad a aceras y bicicletas)",维护减少（例如，坑洼增多、破坏行为增多、非法倾倒增多、清洁度降低、人行道和自行车通行能力下降）
+q6,Reduced access to affordable and healthy food,Acceso reducido a alimentos asequibles y saludables,获得负担得起的健康食品的机会减少
+q6,Reduced access to affordable housing,Acceso reducido a vivienda asequible,获得经济适用住房的机会减少
+q6,Reduced access to after-school programs and other youth programming,Acceso reducido a programas extraescolares y otros programas para jóvenes,减少参加课后活动和其他青少年活动的机会
+q6,Reduced grant funding,Financiación de subvenciones reducida,减少补助资金
+q6,Reduced support for small businesses,Apoyo reducido para pequeñas empresas,减少对小企业的支持
+q6,I have not noticed any changes in the last 5 years,No he notado ningún cambio en los últimos 5 años.,过去 5 年我没有注意到任何变化
+q6,Other,Other,Other
+q7,Reduce sworn police operations,Reducir las operaciones policiales juramentadas,减少宣誓警察的行动
+q7,Reduce fire operations,Reducir las operaciones contra incendios,减少消防行动
+q7,Reduce ceasefire and violence reduction programs,Reducir los programas de alto el fuego y reducción de la violencia,减少停火和减少暴力计划
+q7,Use more civilian staff - not sworn police officers - to respond to calls,Utilización de personal civil (no agentes de policía juramentados) para responder a las llamadas del público,使用文职人员（而非宣誓警察）来响应呼叫
+q7,Reduce overtime spending for police,Reducir el gasto en horas extras de la policía,减少警察加班开支
+q7,Reduce overtime spending for fire,Reducir el gasto de horas extras por incendios,减少消防加班开支
+q7,Other,Other,Other
+q8,Reduce funding for cultural programs and art organizations,Reducir la financiación de programas culturales y organizaciones artísticas,减少对文化项目和艺术组织的资助
+q8,Reduce funding for workforce training programs,Reducir la financiación de los programas de formación de la fuerza laboral,减少劳动力培训计划的资金
+q8,Reduce efforts to attract businesses to Oakland,Reducir esfuerzos para atraer empresas a Oakland,减少吸引企业到奥克兰的力度
+q9,Reduce street paving and traffic light improvements,Reducir la pavimentación de las calles y las mejoras en los semáforos,减少街道铺设和交通灯改进
+q9,Reduce accessibility and safety of sidewalks,Reducir la accesibilidad y seguridad de las aceras,降低人行道的可达性和安全性
+q10,Reduce parks and recreational facilities maintenance,Reducir el mantenimiento de parques e instalaciones recreativas,减少公园和娱乐设施的维护
+q10,Reduce youth programming such as after school programs and summer camps,"Reducir la programación para jóvenes, como los programas extraescolares y los campamentos de verano.",减少课后活动和夏令营等青少年活动
+q10,Reduce improvements and maintenance for libraries,Reducir las mejoras y el mantenimiento de las bibliotecas,减少图书馆的改进和维护
+q11,Reduce funding to develop affordable housing,Reducir la financiación para desarrollar viviendas asequibles,减少开发经济适用住房的资金
+q11,Reduce funding to help first time homebuyers,Reducir la financiación para ayudar a los compradores de vivienda por primera vez,减少帮助首次购房者的资金
+q11,Reduce funding to offer homeless and formerly homeless social services,Reducir la financiación para ofrecer servicios sociales a personas sin hogar,减少为无家可归者和曾经无家可归者提供社会服务的资金
+q11,Reduce funding to sweep homeless encampments,Reducir la financiación para limpiar los campamentos de personas sin hogar,减少清扫无家可归者营地的资金
+q11,Reduce funding to support tenants,Reducir fondos para apoyar a los inquilinos,减少支持租户的资金
+q11,"Reduce MACRO services (non-police response to quality of life calls, under the fire department)","Reducir los servicios MACRO (respuesta no policial a llamadas de calidad de vida, a cargo del departamento de bomberos)",减少MACRO服务（非警察对生活质量呼叫的响应，由消防部门负责）
+q11,Other,Other,Other
+q12,"Yes, I would vote to increase sales tax from 10.25% to 10.75%","Sí, votaría para aumentar el impuesto sobre las ventas del 10,25% al ​​10,75%.",是的，我支持将销售税从 10.25% 提高到 10.75%
+q12,"No, I do not support a sales tax increase","No, no apoyo un aumento del impuesto sobre las ventas.",不，我不支持增加销售税
+q12,Maybe,Tal vez,或许
+q14,District 1,Distrito 1,第 1 区
+q14,District 2,Distrito 2,第 2 区
+q14,District 3,Distrito 3,第 3 区
+q14,District 4,Distrito 4,第 4 区
+q14,District 5,Distrito 5,第 5 区
+q14,District 6,Distrito 6,第 6 区
+q14,District 7,Distrito 7,第 7 区
+q15,Less than 1 year,Menos de un año,不到 1 年
+q15,1-3 years,1-3 años,1-3 年
+q15,4-7 years,4-7 años,4-7 年
+q15,7-10 years,7-10 años,7-10 年
+q15,11-15 years,11-15 años,11-15 年
+q15,16-20 years,16-20 años,16-20 年
+q15,21-30 years,21-30 años,21-30 年
+q15,Over 30 years,Mas de 30 años,30 年以上
+q16,75 and older,75 años o mas,75 岁及以上
+q16,65-74,65-74 años,65-74
+q16,60-64,60-64 años,60-64
+q16,55-59,55-59 años,55-59
+q16,50-54,50-54 años,50-54
+q16,45-49,45-49 años,45-49
+q16,40-44,40-44 años,40-44
+q16,35-39,35-39 años,35-39
+q16,30-34,30-34 años,30-34
+q16,25-29,25-29 años,25-29
+q16,20-24,20-24 años,20-24
+q16,18-24,18-24 años,18-24
+q16,0-17,0-17 años,0-17
+q17,American Indian or Alaska Native,Indio americano o nativo de Alaska,美国印第安人或阿拉斯加原住民
+q17,Asian,Asiático,亚洲人
+q17,Black or African American,Afroamericano,黑人或非裔美国人
+q17,Hispanic or Latino,Latino,西班牙裔或拉丁裔
+q17,Middle Eastern or North African,Oriente Medio o África del Norte,中东或北非人
+q17,Native Hawaiian or Pacific Islander,Nativo hawaiano o isleño del Pacífico,夏威夷原住民或太平洋岛民
+q17,White,Blanco,白人
+q17,Multiracial,Multirracial,多种族
+q17,Other,Other,Other
+q18,Male,Masculino,男性
+q18,Female,Femenino,女性
+q18,Nonbinary,No binario,非二元性
+q18,Other,Other,Other
+q19,First through 11th grade,Del primero al undécimo grado,一至十一年级
+q19,High school graduate,Graduado de secundaria,高中毕业
+q19,Vocational/technical school,Escuela vocacional/técnica,职业技术学校
+q19,"Some college, no degree","Algunos estudios universitarios, sin título",上过大学，没有学位
+q19,Associate degree,Grado asociado,副学士学位
+q19,Four-year college or bachelor’s degree,Universidad de cuatro años o licenciatura,四年制大学或学士学位
+q19,Graduate school or advanced degree,Estudios de posgrado o grado avanzado,研究生院或高级学位

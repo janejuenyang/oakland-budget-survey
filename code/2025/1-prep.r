@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: prep data for fy25-27 oakland, ca resident budget priorities survey
-# last edited: jan 19, 2025
+# last edited: feb 3, 2025
 # TODO: 
 # 1. handle "other" and demographic questions
 # 2. create script for weighting
@@ -20,6 +20,7 @@ library(gt)
 library(fs)
 library(janitor)
 library(skimr)
+library(polyglotr)
 
 # load utility functions
 files_utilities <- dir_ls("code/utilities")
@@ -97,8 +98,6 @@ d_approval <- tibble(
 
 # save all raw survey data
 save(d_survey_raw_en, d_survey_raw_es, d_survey_raw_zh, 
-     d_place_to_live, d_approval,
-     d_qmap, d_rmap,
      file = "data/2025/raw/survey_raw.RData")
 
 #### identify questions that require special handling in surveys ####
@@ -115,14 +114,82 @@ q_demographics <- rep(paste0("q", 15:19))
 # identify questions with "other" options
 q_other <- c("q5", "q6", "q7", "q11", "q17", "q18")
 
+# identify free-form response questions
+q_freeform <- c("q4", "q13")
+
 #### prepare chinese responses ####
-d_survey_zh <- d_survey_raw_zh %>% 
+d_survey_pp_zh <- d_survey_raw_zh %>% 
     preprocess_survey_data(
         district_qid = "q14", 
         language_code = "zh", 
         multi_select_qids = q_multi
-)
+    )
+
+d_survey_totranslate_zh <- d_survey_pp_zh %>%
+    filter(!is.na(response) & question %in% q_freeform)
+
+d_survey_translated_zh <- d_survey_totranslate_zh %>%
+    mutate(freeform_translation = translate_column(response, source_lang = "zh-CN")) %>%
+    select(response_id, freeform_translation)
+
+d_survey_zh <- d_survey_pp_zh %>%
+    left_join(d_survey_translated_zh, by = "response_id") %>%
+    mutate(r_en = if_else(
+        question %in% q_freeform,
+        freeform_translation,
+        r_en
+    )) %>%
+    select(-freeform_translation)
     
 #### prepare spanish responses ####
+d_survey_pp_es <- d_survey_raw_es %>% 
+    preprocess_survey_data(
+        district_qid = "q14", 
+        language_code = "es", 
+        multi_select_qids = q_multi
+    )
+
+d_survey_totranslate_es <- d_survey_pp_es %>%
+    filter(!is.na(response) & question %in% q_freeform)
+
+d_survey_translated_es <- d_survey_totranslate_es %>%
+    mutate(freeform_translation = translate_column(response, source_lang = "es")) %>%
+    select(response_id, freeform_translation)
+
+d_survey_es <- d_survey_pp_es %>%
+    left_join(d_survey_translated_es, by = "response_id") %>%
+    mutate(r_en = if_else(
+        question %in% q_freeform,
+        freeform_translation,
+        r_en
+    )) %>%
+    select(-freeform_translation)
+
 #### prepare english responses ####
+d_survey_en <- d_survey_raw_en %>% 
+    # make sure district question comes in as a character vector, not list
+    mutate(`14. Which district do you live in?` = as.character(`14. Which district do you live in?`)) %>%
+    preprocess_survey_data(
+        district_qid = "q14", 
+        language_code = "en", 
+        multi_select_qids = q_multi
+    ) %>%
+    # match columns to spanish and chinese processed results
+    rename(r_en = response_en) %>%
+    mutate(
+        r_zh = NA,
+        r_es = NA,
+    ) %>%
+    select(timestamp:r_en, r_zh, r_es, response_id)
+
 #### combine survey responses into single dataframe ####
+d_survey <- bind_rows(d_survey_zh, d_survey_es, d_survey_en)
+
+# save combined response dataframe as .csv and .Rdata with other dataframes
+save(d_survey, d_place_to_live, d_approval,d_qmap, d_rmap,
+     file = "data/2025/processed/survey_processed.RData")
+write_csv(d_survey, file = "data/2025/processed/survey_processed.csv")
+
+# save question and response maps as .csv
+write_csv(d_qmap, file = "data/2025/processed/qmap.csv")
+write_csv(d_rmap, file = "data/2025/processed/rmap.csv")
