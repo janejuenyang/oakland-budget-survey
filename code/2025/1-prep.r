@@ -1,9 +1,6 @@
 ################################################################################
 # purpose: prep data for fy25-27 oakland, ca resident budget priorities survey
 # last edited: feb 5, 2025
-# TODO: 
-# 2. create script for weighting
-# 3. create script for visualizing
 ################################################################################
 
 #### load packages and utility functions ####
