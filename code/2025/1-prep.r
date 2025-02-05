@@ -1,8 +1,7 @@
 ################################################################################
 # purpose: prep data for fy25-27 oakland, ca resident budget priorities survey
-# last edited: feb 4, 2025
+# last edited: feb 5, 2025
 # TODO: 
-# 1. handle "other" and demographic questions
 # 2. create script for weighting
 # 3. create script for visualizing
 ################################################################################
@@ -181,7 +180,7 @@ d_survey_es <- d_survey_pp_es %>%
 
 #### prepare english responses ####
 # structure survey data
-d_survey_pp_en <- d_survey_raw_en %>% 
+d_survey_en <- d_survey_raw_en %>% 
     # make sure district question comes in as a character vector, not list
     mutate(`14. Which district do you live in?` = as.character(`14. Which district do you live in?`)) %>%
     preprocess_survey_data(
@@ -190,7 +189,7 @@ d_survey_pp_en <- d_survey_raw_en %>%
         language_code = "en", 
         multi_select_qids = q_multi
     ) %>%
-    # match columns to spanish and chinese processed results
+    # match columns to spanish and chinese survey processed results
     rename(r_en = response_en) %>%
     mutate(
         r_zh = NA,
@@ -200,36 +199,95 @@ d_survey_pp_en <- d_survey_raw_en %>%
         #               a draft for feedback on the questions from various organizations
         #               and networks. as a result, the raw data includes some options
         #               with slight variations in the wording.
-        response = case_when(
+        r_en = case_when(
             question == "q7" & 
-                response == "Expand the use of civilian teams, instead of police, to respond to calls where no threat or harm" ~
-                "Use of civilian staff - not sworn police officers - to respond to calls",
+                r_en == "Expand the use of civilian teams, instead of police, to respond to calls where no threat or harm" ~
+                "Use more civilian staff - not sworn police officers - to respond to calls",
             question == "q8" & 
-                response == "Reduce funding for cultural programs" ~
+                r_en == "Reduce funding for cultural programs" ~
                 "Reduce funding for cultural programs and art organizations",
             question == "q9" & 
-                response == "Slow down investments to increase accessibility and safety of sidewalks" ~
+                r_en == "Slow down investments to increase accessibility and safety of sidewalks" ~
                 "Reduce accessibility and safety of sidewalks",
             question == "q9" & 
-                response == "Slow down street repaving and traffic light improvements" ~
+                r_en == "Slow down street repaving and traffic light improvements" ~
                 "Reduce street paving and traffic light improvements",
             question == "q10" & 
-                response == "Defer improvements and maintenance for libraries" ~
+                r_en == "Defer improvements and maintenance for libraries" ~
                 "Reduce improvements and maintenance for libraries",
             question == "q10" & 
-                response == "Defer improvements and maintenance frequency for parks and recreational facilities" ~
+                r_en == "Defer improvements and maintenance frequency for parks and recreational facilities" ~
                 "Reduce parks and recreational facilities maintenance",
             question == "q10" & 
-                response == "Increase fees for youth programming such as camps" ~
+                r_en == "Increase fees for youth programming such as camps" ~
                 "Reduce youth programming such as after school programs and summer camps",
-            TRUE ~ response
+            # one case -- original range was narrower
+            question == "q15" & 
+                r_en == "3-5 years" ~
+                "4-7 years",
+            # one case -- original range was broader
+            question == "q15" & 
+                r_en == "5-10 years" ~
+                "4-7 years",
+            TRUE ~ r_en
         )
     ) %>%
     select(timestamp:r_en, r_zh, r_es, response_id)
 
 #### create final processed data ####
 # combine survey responses into single dataframe
-d_survey <- bind_rows(d_survey_zh, d_survey_es, d_survey_en)
+d_survey_combined <- bind_rows(d_survey_zh, d_survey_es, d_survey_en) %>%
+    filter(
+        # remove rows for unanswered questions
+        !is.na(response)
+    )
+
+# categorize responses to questions with "other" response option
+# and include separate column for full provided response
+d_survey_other_responses_grouped <- d_survey_combined %>%
+    mutate(
+        other_detail = if_else(
+            question %in% q_other & !(r_en %in% d_rmap$r_en[d_rmap$question %in% q_other]),
+            r_en,
+            NA_character_
+        ),
+        r_en = if_else(
+            question %in% q_other & !(r_en %in% d_rmap$r_en[d_rmap$question %in% q_other]),
+            "Other Response",
+            r_en
+        )
+    )
+
+# pivot demographic responses for easier population segment analysis
+d_survey <- d_survey_other_responses_grouped %>%
+    # create a copy of questions and r_en to pivot from
+    mutate(
+        pivot_names = question,
+        pivot_values = r_en
+    ) %>%
+    pivot_wider(
+        names_from = pivot_names,
+        values_from = pivot_values
+    ) %>%
+    select(timestamp:other_detail, all_of(q_demographics)) %>%
+    group_by(respondent_id) %>%
+    fill(all_of(q_demographics), .direction = "updown") %>%
+    ungroup() %>%
+    mutate(across(all_of(q_demographics), ~replace_na(., "No Response"))) %>%
+    # rename demographic columns
+    rename(
+        oakland_tenure = q15,
+        age = q16,
+        race_ethnicity = q17,
+        gender = q18,
+        education = q19
+    ) %>%
+    # reorder columns
+    select(
+        timestamp, respondent_id, question, response, other_detail, response_id,
+        survey_language, starts_with("r_"),
+        district, oakland_tenure, age, race_ethnicity, gender, education,
+    )
 
 # save combined response dataframe as .csv and .Rdata with other dataframes
 save(d_survey, d_place_to_live, d_approval,d_qmap, d_rmap,

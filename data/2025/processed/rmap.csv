@@ -17,7 +17,6 @@ q5,Feeling safe when walking and/or leaving my car alone,Sentirse seguro al cami
 q5,Timely and effective emergency responders,Respondedores de emergencia oportunos y efectivos,及时有效的应急响应人员
 q5,Vibrant arts and culture scene,Vibrante escena artística y cultural,充满活力的艺术和文化场景
 q5,Robust small business economy,Economía robusta de pequeñas empresas,小型企业经济强劲
-q5,Other,Other,Other
 q6,Reduced public safety resources,Reducción de recursos de seguridad pública,公共安全资源减少
 q6,"Reduced maintenance (e.g. more potholes, more vandalism, more illegal dumping, reduced cleanliness, reduced sidewalk and bike accessibility)","Mantenimiento reducido (por ejemplo, más baches, más vandalismo, más vertidos ilegales, menor limpieza, menor accesibilidad a aceras y bicicletas)",维护减少（例如，坑洼增多、破坏行为增多、非法倾倒增多、清洁度降低、人行道和自行车通行能力下降）
 q6,Reduced access to affordable and healthy food,Acceso reducido a alimentos asequibles y saludables,获得负担得起的健康食品的机会减少
@@ -26,14 +25,12 @@ q6,Reduced access to after-school programs and other youth programming,Acceso re
 q6,Reduced grant funding,Financiación de subvenciones reducida,减少补助资金
 q6,Reduced support for small businesses,Apoyo reducido para pequeñas empresas,减少对小企业的支持
 q6,I have not noticed any changes in the last 5 years,No he notado ningún cambio en los últimos 5 años.,过去 5 年我没有注意到任何变化
-q6,Other,Other,Other
 q7,Reduce sworn police operations,Reducir las operaciones policiales juramentadas,减少宣誓警察的行动
 q7,Reduce fire operations,Reducir las operaciones contra incendios,减少消防行动
 q7,Reduce ceasefire and violence reduction programs,Reducir los programas de alto el fuego y reducción de la violencia,减少停火和减少暴力计划
 q7,Use more civilian staff - not sworn police officers - to respond to calls,Utilización de personal civil (no agentes de policía juramentados) para responder a las llamadas del público,使用文职人员（而非宣誓警察）来响应呼叫
 q7,Reduce overtime spending for police,Reducir el gasto en horas extras de la policía,减少警察加班开支
 q7,Reduce overtime spending for fire,Reducir el gasto de horas extras por incendios,减少消防加班开支
-q7,Other,Other,Other
 q8,Reduce funding for cultural programs and art organizations,Reducir la financiación de programas culturales y organizaciones artísticas,减少对文化项目和艺术组织的资助
 q8,Reduce funding for workforce training programs,Reducir la financiación de los programas de formación de la fuerza laboral,减少劳动力培训计划的资金
 q8,Reduce efforts to attract businesses to Oakland,Reducir esfuerzos para atraer empresas a Oakland,减少吸引企业到奥克兰的力度
@@ -48,7 +45,6 @@ q11,Reduce funding to offer homeless and formerly homeless social services,Reduc
 q11,Reduce funding to sweep homeless encampments,Reducir la financiación para limpiar los campamentos de personas sin hogar,减少清扫无家可归者营地的资金
 q11,Reduce funding to support tenants,Reducir fondos para apoyar a los inquilinos,减少支持租户的资金
 q11,"Reduce MACRO services (non-police response to quality of life calls, under the fire department)","Reducir los servicios MACRO (respuesta no policial a llamadas de calidad de vida, a cargo del departamento de bomberos)",减少MACRO服务（非警察对生活质量呼叫的响应，由消防部门负责）
-q11,Other,Other,Other
 q12,"Yes, I would vote to increase sales tax from 10.25% to 10.75%","Sí, votaría para aumentar el impuesto sobre las ventas del 10,25% al ​​10,75%.",是的，我支持将销售税从 10.25% 提高到 10.75%
 q12,"No, I do not support a sales tax increase","No, no apoyo un aumento del impuesto sobre las ventas.",不，我不支持增加销售税
 q12,Maybe,Tal vez,或许
@@ -88,11 +84,9 @@ q17,Middle Eastern or North African,Oriente Medio o África del Norte,中东或�
 q17,Native Hawaiian or Pacific Islander,Nativo hawaiano o isleño del Pacífico,夏威夷原住民或太平洋岛民
 q17,White,Blanco,白人
 q17,Multiracial,Multirracial,多种族
-q17,Other,Other,Other
 q18,Male,Masculino,男性
 q18,Female,Femenino,女性
 q18,Nonbinary,No binario,非二元性
-q18,Other,Other,Other
 q19,First through 11th grade,Del primero al undécimo grado,一至十一年级
 q19,High school graduate,Graduado de secundaria,高中毕业
 q19,Vocational/technical school,Escuela vocacional/técnica,职业技术学校
