@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: structure survey data for easy analysis
-# last edited: feb 3, 2025
+# last edited: feb 4, 2025
 ################################################################################
 
 #' @title Extract question number from survey column name
@@ -407,8 +407,10 @@ map_en_responses <- function(df, language_code = c("en", "es", "zh")) {
 #'
 #' @param df A dataframe containing raw survey responses, with the first column 
 #'   being a timestamp and subsequent columns being survey questions
+#' @param screener_qid String identifying the question column containing whether 
+#'   respondent lives in Oakland (e.g., "q1")
 #' @param district_qid String identifying the question column containing district 
-#'   information (e.g., "q1")
+#'   information (e.g., "q2")
 #' @param language_code Character string specifying the source language.
 #'   Must be one of: "en" (English), "es" (Spanish), or "zh" (Chinese)
 #' @param multi_select_questions Named list where:
@@ -444,12 +446,14 @@ map_en_responses <- function(df, language_code = c("en", "es", "zh")) {
 #' # Process English survey data
 #' processed_data <- preprocess_survey_data(
 #'   df = survey_data,
-#'   district_qid = "q1",
+#'   screener_qid = "q2"
+#'   district_qid = "q2",
 #'   language_code = "en",
 #'   multi_select_questions = multi_select_qs
 #' )
 preprocess_survey_data <- function(
     df, 
+    screener_qid,
     district_qid, 
     language_code = c("en", "es", "zh"),
     multi_select_qids = NULL
@@ -493,8 +497,12 @@ preprocess_survey_data <- function(
     # standardize question names
     df_renamed <- rename_questions(df)
     
+    # remove responses from respondents who do not live in Oakland
+    df_screened <- df_renamed %>%
+        filter(.data[[screener_qid]] %in% c("Yes", "Sí", "是的"))
+    
     # create response IDs and standardize districts
-    df_processed <- df_renamed %>% 
+    df_processed <- df_screened %>% 
         mutate(respondent_id = create_id(
             prefix = language_code,
             row_number = row_number()

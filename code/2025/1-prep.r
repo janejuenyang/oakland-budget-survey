@@ -101,6 +101,9 @@ save(d_survey_raw_en, d_survey_raw_es, d_survey_raw_zh,
      file = "data/2025/raw/survey_raw.RData")
 
 #### identify questions that require special handling in surveys ####
+# identify residency screener question
+q_screener <- "q1"
+
 # identify multi-select questions with list of question IDs with their options
 q_multi <- list(
     "q5" = d_rmap_long %>% filter(question == "q5") %>% pull(value), 
@@ -123,6 +126,7 @@ q_freeform <- c("q4", "q13")
 #### prepare chinese responses ####
 d_survey_pp_zh <- d_survey_raw_zh %>% 
     preprocess_survey_data(
+        screener_qid = q_screener,
         district_qid = q_district, 
         language_code = "zh", 
         multi_select_qids = q_multi
@@ -147,6 +151,7 @@ d_survey_zh <- d_survey_pp_zh %>%
 #### prepare spanish responses ####
 d_survey_pp_es <- d_survey_raw_es %>% 
     preprocess_survey_data(
+        screener_qid = q_screener,
         district_qid = q_district, 
         language_code = "es", 
         multi_select_qids = q_multi
@@ -173,6 +178,7 @@ d_survey_en <- d_survey_raw_en %>%
     # make sure district question comes in as a character vector, not list
     mutate(`14. Which district do you live in?` = as.character(`14. Which district do you live in?`)) %>%
     preprocess_survey_data(
+        screener_qid = q_screener,
         district_qid = q_district, 
         language_code = "en", 
         multi_select_qids = q_multi
