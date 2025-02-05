@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: structure survey data for easy analysis
-# last edited: feb 4, 2025
+# last edited: feb 5, 2025
 ################################################################################
 
 #' @title Extract question number from survey column name
@@ -157,9 +157,17 @@ standardize_districts <- function(df, question_id) {
         stop(paste("Column", question_id, "not found in dataframe"))
     }
 
-    # remove council member names
     df_res <- df %>%
-        mutate(district = extract_outside_parentheses(.data[[question_id]]))
+        mutate(
+            # remove council member names
+            district = extract_outside_parentheses(.data[[question_id]]),
+            # handle draft survey cases that listed just numbers, no "District"
+            district = case_when(
+                district == "1" ~ "District 1",
+                district == "3" ~ "District 3",
+                TRUE ~ district
+            )
+        )
 
     # return dataframe with updated district column
     return(df_res)
