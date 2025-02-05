@@ -124,6 +124,7 @@ q_other <- c("q5", "q6", "q7", "q11", "q17", "q18")
 q_freeform <- c("q4", "q13")
 
 #### prepare chinese responses ####
+# structure survey data
 d_survey_pp_zh <- d_survey_raw_zh %>% 
     preprocess_survey_data(
         screener_qid = q_screener,
@@ -132,6 +133,7 @@ d_survey_pp_zh <- d_survey_raw_zh %>%
         multi_select_qids = q_multi
     )
 
+# translate free-form responses using Google Translation
 d_survey_totranslate_zh <- d_survey_pp_zh %>%
     filter(!is.na(response) & question %in% q_freeform)
 
@@ -139,6 +141,7 @@ d_survey_translated_zh <- d_survey_totranslate_zh %>%
     mutate(freeform_translation = translate_column(response, source_lang = "zh-CN")) %>%
     select(response_id, freeform_translation)
 
+# combine translated free-form responses with rest of survey data
 d_survey_zh <- d_survey_pp_zh %>%
     left_join(d_survey_translated_zh, by = "response_id") %>%
     mutate(r_en = if_else(
@@ -149,6 +152,7 @@ d_survey_zh <- d_survey_pp_zh %>%
     select(-freeform_translation)
     
 #### prepare spanish responses ####
+# structure survey data
 d_survey_pp_es <- d_survey_raw_es %>% 
     preprocess_survey_data(
         screener_qid = q_screener,
@@ -157,6 +161,7 @@ d_survey_pp_es <- d_survey_raw_es %>%
         multi_select_qids = q_multi
     )
 
+# translate free-form responses using Google Translation
 d_survey_totranslate_es <- d_survey_pp_es %>%
     filter(!is.na(response) & question %in% q_freeform)
 
@@ -164,6 +169,7 @@ d_survey_translated_es <- d_survey_totranslate_es %>%
     mutate(freeform_translation = translate_column(response, source_lang = "es")) %>%
     select(response_id, freeform_translation)
 
+# combine translated free-form responses with rest of survey data
 d_survey_es <- d_survey_pp_es %>%
     left_join(d_survey_translated_es, by = "response_id") %>%
     mutate(r_en = if_else(
@@ -174,7 +180,8 @@ d_survey_es <- d_survey_pp_es %>%
     select(-freeform_translation)
 
 #### prepare english responses ####
-d_survey_en <- d_survey_raw_en %>% 
+# structure survey data
+d_survey_pp_en <- d_survey_raw_en %>% 
     # make sure district question comes in as a character vector, not list
     mutate(`14. Which district do you live in?` = as.character(`14. Which district do you live in?`)) %>%
     preprocess_survey_data(
@@ -188,10 +195,40 @@ d_survey_en <- d_survey_raw_en %>%
     mutate(
         r_zh = NA,
         r_es = NA,
+        # consolidate final question verbiage with pre-finalized question verbiage
+        # context note: before wide-scale outreach on the survey, the BAC circulated
+        #               a draft for feedback on the questions from various organizations
+        #               and networks. as a result, the raw data includes some options
+        #               with slight variations in the wording.
+        response = case_when(
+            question == "q7" & 
+                response == "Expand the use of civilian teams, instead of police, to respond to calls where no threat or harm" ~
+                "Use of civilian staff - not sworn police officers - to respond to calls",
+            question == "q8" & 
+                response == "Reduce funding for cultural programs" ~
+                "Reduce funding for cultural programs and art organizations",
+            question == "q9" & 
+                response == "Slow down investments to increase accessibility and safety of sidewalks" ~
+                "Reduce accessibility and safety of sidewalks",
+            question == "q9" & 
+                response == "Slow down street repaving and traffic light improvements" ~
+                "Reduce street paving and traffic light improvements",
+            question == "q10" & 
+                response == "Defer improvements and maintenance for libraries" ~
+                "Reduce improvements and maintenance for libraries",
+            question == "q10" & 
+                response == "Defer improvements and maintenance frequency for parks and recreational facilities" ~
+                "Reduce parks and recreational facilities maintenance",
+            question == "q10" & 
+                response == "Increase fees for youth programming such as camps" ~
+                "Reduce youth programming such as after school programs and summer camps",
+            TRUE ~ response
+        )
     ) %>%
     select(timestamp:r_en, r_zh, r_es, response_id)
 
-#### combine survey responses into single dataframe ####
+#### create final processed data ####
+# combine survey responses into single dataframe
 d_survey <- bind_rows(d_survey_zh, d_survey_es, d_survey_en)
 
 # save combined response dataframe as .csv and .Rdata with other dataframes
