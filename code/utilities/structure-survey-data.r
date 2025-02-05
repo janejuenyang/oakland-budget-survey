@@ -512,17 +512,6 @@ preprocess_survey_data <- function(
     # convert to long format
     df_long <- df_processed %>% elongate_survey_data()
     
-    # map non-English responses to English
-    df_translated <- df_long %>%
-        mutate(
-            survey_language = case_when(
-                language_code == "en" ~ "English",
-                language_code == "es" ~ "Spanish",
-                language_code == "zh" ~ "Chinese"
-            )
-        ) %>%
-        map_en_responses(language_code = language_code)
-    
     # process multi-select questions if provided
     if (!is.null(multi_select_qids)) {
         # function to process a single multi-select question
@@ -550,14 +539,25 @@ preprocess_survey_data <- function(
             .x = names(multi_select_qids),
             .y = multi_select_qids,
             .f = process_one_question,
-            .init = df_translated
+            .init = df_long
         )
     } else {
-        df_multi <- df_translated
+        df_multi <- df_long
     }
     
+    # map non-English responses to English
+    df_translated <- df_multi %>%
+        mutate(
+            survey_language = case_when(
+                language_code == "en" ~ "English",
+                language_code == "es" ~ "Spanish",
+                language_code == "zh" ~ "Chinese"
+            )
+        ) %>%
+        map_en_responses(language_code = language_code)
+    
     # add a response id that is unique to each row in restructured data
-    df_res <- df_multi %>%
+    df_res <- df_translated %>%
         group_by(respondent_id) %>%
         mutate(response_id = paste(
             respondent_id, 
