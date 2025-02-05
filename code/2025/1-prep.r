@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: prep data for fy25-27 oakland, ca resident budget priorities survey
-# last edited: feb 3, 2025
+# last edited: feb 4, 2025
 # TODO: 
 # 1. handle "other" and demographic questions
 # 2. create script for weighting
@@ -111,6 +111,9 @@ q_multi <- list(
 # exclude "district" (handled separately)
 q_demographics <- rep(paste0("q", 15:19))
 
+# identify district question
+q_district <- "q14"
+
 # identify questions with "other" options
 q_other <- c("q5", "q6", "q7", "q11", "q17", "q18")
 
@@ -120,7 +123,7 @@ q_freeform <- c("q4", "q13")
 #### prepare chinese responses ####
 d_survey_pp_zh <- d_survey_raw_zh %>% 
     preprocess_survey_data(
-        district_qid = "q14", 
+        district_qid = q_district, 
         language_code = "zh", 
         multi_select_qids = q_multi
     )
@@ -144,7 +147,7 @@ d_survey_zh <- d_survey_pp_zh %>%
 #### prepare spanish responses ####
 d_survey_pp_es <- d_survey_raw_es %>% 
     preprocess_survey_data(
-        district_qid = "q14", 
+        district_qid = q_district, 
         language_code = "es", 
         multi_select_qids = q_multi
     )
@@ -170,7 +173,7 @@ d_survey_en <- d_survey_raw_en %>%
     # make sure district question comes in as a character vector, not list
     mutate(`14. Which district do you live in?` = as.character(`14. Which district do you live in?`)) %>%
     preprocess_survey_data(
-        district_qid = "q14", 
+        district_qid = q_district, 
         language_code = "en", 
         multi_select_qids = q_multi
     ) %>%
