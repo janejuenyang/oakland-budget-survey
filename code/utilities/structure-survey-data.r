@@ -517,7 +517,7 @@ preprocess_survey_data <- function(
         mutate(
             survey_language = case_when(
                 language_code == "en" ~ "English",
-                language_code == "sp" ~ "Spanish",
+                language_code == "es" ~ "Spanish",
                 language_code == "zh" ~ "Chinese"
             )
         ) %>%
