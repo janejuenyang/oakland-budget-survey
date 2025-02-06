@@ -272,8 +272,6 @@ separate_multi_select <- function(df, col, options) {
     return(df_res)
 }
 
-# TODO: manage "other" responses
-
 #' @title Reshape survey data from wide to long format
 #' #' @description
 #' Given a dataframe of survey data in wide format, pivot into long format
