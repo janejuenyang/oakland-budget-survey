@@ -13,8 +13,8 @@ library(skimr)
 library(polyglotr)
 
 # load utility functions
-files_utilities <- dir_ls("code/utilities")
-map(files_utilities, source)
+source("code/utilities/structure-survey-data.r")
+source("code/utilities/translate.r")
 
 #### import data ####
 # the responses are saved in google sheets that are publicly available
