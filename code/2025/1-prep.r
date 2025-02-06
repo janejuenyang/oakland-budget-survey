@@ -265,6 +265,19 @@ d_survey <- d_survey_other_responses_grouped %>%
     fill(all_of(q_demographics), .direction = "updown") %>%
     ungroup() %>%
     mutate(across(all_of(q_demographics), ~replace_na(., "No Response"))) %>%
+    # final clean-up and translation district names
+    mutate(
+        # handle missing responses
+        district = if_else(
+            district == "NULL" | is.na(district), 
+            "No Response", 
+            district
+        ),
+        # translate to English
+        district = str_replace(district, "Distrito", "District"),
+        district = str_replace(district, "第", "District"),
+        district = str_replace(district, " 区", ""),
+    ) %>%
     # rename demographic columns
     rename(
         oakland_tenure = q15,
