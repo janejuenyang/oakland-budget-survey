@@ -8,13 +8,7 @@
 library(tidyverse)
 library(googlesheets4)
 library(janitor)
-library(ggrepel)
-library(ggtext)
-library(paletteer)
-library(scales)
-library(gt)
 library(fs)
-library(janitor)
 library(skimr)
 library(polyglotr)
 
