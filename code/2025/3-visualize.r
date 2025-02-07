@@ -1,15 +1,6 @@
 ################################################################################
 # purpose: visualize weighted responses
-# last edited: feb 6, 2025
-# analyze by:
-#   total [DONE]
-#   segments: [TODO]
-#   segment: district
-#   segment: age - youth, adults, older adults
-#   segment: tenure living in Oakland
-#   segment: gender
-#   segment: race/ethnicity
-#   segment: education
+# last edited: feb 7, 2025
 ################################################################################
 
 #### load packages, utility functions, and data ####
@@ -18,6 +9,7 @@ library(tidyverse)
 library(skimr)
 library(patchwork)
 library(scales)
+library(ggtext)
 
 # load utility functions
 source("code/utilities/ggplot-settings.r")
@@ -183,3 +175,29 @@ walk2(bar_plots, q_bar, ~ggsave(
     units = "in",
     dpi = 300
 ))
+
+#### bar charts by segment, with overall reference ####
+# define segments
+segment_vars <- c("district", "oakland_tenure", "age", "age_group", "gender",
+                  "race_ethnicity","race_group", "education", "education_group")
+
+# create all combinations of questions and segments
+q_segment_combos <- expand_grid(q = q_bar, segment = segment_vars) 
+
+# create segmented summary tables
+pwalk(q_segment_combos,
+    ~assign(paste0("s_", .x, "_by_", .y),
+        summarize_distributions(
+            df = d_survey %>% filter(question == .x),
+            group_var = "r_en",
+            segment_var = .y
+        ),
+        envir = .GlobalEnv
+    )
+)
+
+# create segmented plots
+walk(q_bar, ~plot_all_segments(.x, segment_vars))
+
+#### save objects ####
+save.image("data/2025/visualized/survey_viz.Rdata")
