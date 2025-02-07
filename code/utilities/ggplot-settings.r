@@ -23,7 +23,6 @@ theme_update(
     panel.background = element_rect(fill = "transparent", color = NA),
     plot.background = element_rect(fill = "transparent", color = NA), 
     panel.border = element_blank(),
-    # legend.position = "none",
     # customize plot margin (top, right, bottom, left)
     plot.margin = margin(5, 5, 5, 5),
     # customize plot labels
