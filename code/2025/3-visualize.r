@@ -2,7 +2,8 @@
 # purpose: visualize weighted responses
 # last edited: feb 6, 2025
 # analyze by:
-#   total
+#   total [DONE]
+#   segments: [TODO]
 #   segment: district
 #   segment: age - youth, adults, older adults
 #   segment: tenure living in Oakland
@@ -16,11 +17,7 @@
 library(tidyverse)
 library(skimr)
 library(patchwork)
-library(ggrepel)
-library(ggtext)
-library(paletteer)
 library(scales)
-library(gt)
 
 # load utility functions
 source("code/utilities/ggplot-settings.r")
@@ -29,18 +26,36 @@ source("code/utilities/plot-survey-data.r")
 # load data
 load("data/2025/processed/survey_weighted.Rdata")
 
+#### create overall summaries by question ####
+# create vector of questions
+q <- d_qmap$question
+
+# calculate summary tables per question
+q %>%
+    walk(
+        ~assign(paste0("s_", .x),
+            summarize_distributions(
+                df = d_survey %>% filter(question == .x), 
+                group_var = "r_en"
+            ),
+            envir = .GlobalEnv
+        )
+    )
+
 #### demographics ####
 # create vector of demographic categories
 demographic_vars <- names(d_respondents %>% select(-respondent_id, -wt))
 
-# create summary tables of unweighted and weighted respondents for each 
-# demographic category. save each summary table to an object with name 
-# pattern `s_variable`
+# calculate summary tables per demographic category
 demographic_vars %>%
     walk(
         ~assign(paste0("s_", .x),
-                summarize_distributions(df = d_respondents, group_var = .x),
-            envir = .GlobalEnv)
+                summarize_distributions(
+                    df = d_respondents, 
+                    group_var = .x
+                ),
+                envir = .GlobalEnv
+        )
     )
 
 # add census bureau percent distributions to each summary table
@@ -143,9 +158,28 @@ ggsave(
 )
 
 #### longitudinal ####
-# TODO: make pretty charts; for initial discussion draft, included table only
-q_longitudinal <- c("q2", "q3")
+# for initial discussion draft, included table only
+s_q2
+s_q3
 
-#### great place x budget impact ####
+# TODO: make alluvial charts for overall
+# TODO: segment by 
 
-#### tough choices and sales tax ####
+#### overall bar charts ####
+# create vector of questions to plot as bar
+q_bar <- paste0("q", seq(5, 12))
+
+# create overall plots of each
+bar_plots <- q_bar %>% 
+    map(~get(paste0("s_", .x))) %>%
+    map(~plot_distribution(.x))
+
+# save plots
+walk2(bar_plots, q_bar, ~ggsave(
+    filename = paste0("output/2025/", .y, ".png"),
+    plot = .x,
+    width = 5,
+    height = 5,
+    units = "in",
+    dpi = 300
+))
