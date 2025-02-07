@@ -50,6 +50,10 @@ d_survey <- d_survey %>%
         across(district:education, as_factor),
         # reorder factor levels to match what's available in census
         district = fct_relevel(district, sort),
+        oakland_tenure = fct_relevel(oakland_tenure,
+            "Over 30 years", "21-30 years", "16-20 years", "11-15 years",
+            "7-10 years", "4-7 years", "1-3 years", "Less than 1 year", 
+            "No Response"),
         age = fct_relevel(age, sort),
         age_group = fct_collapse(
             age,
