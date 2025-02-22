@@ -137,7 +137,7 @@ demographic_plots <- demographic_vars %>%
         labs(title = demographic_titles[.y]) +
         theme(
             legend.position = "top",
-            legend.background = element_rect(color = "black", linewidth = 0.5),
+            legend.background = element_rect(fill = "seashell", linewidth = 0),
             legend.margin = margin(4, 4, 4, 4)
         ) +
         guides(
@@ -154,7 +154,7 @@ combined_demographic_plots <- wrap_plots(demographic_plots) +
             legend.position = "top",
             legend.justification = "right",
         )
-    )
+    ); combined_demographic_plots
 
 # save plot
 ggsave(
