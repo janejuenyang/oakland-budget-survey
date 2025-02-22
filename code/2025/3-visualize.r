@@ -10,6 +10,7 @@ library(skimr)
 library(patchwork)
 library(scales)
 library(ggtext)
+library(paletteer)
 
 # load utility functions
 source("code/utilities/ggplot-settings.r")
@@ -17,6 +18,10 @@ source("code/utilities/plot-survey-data.r")
 
 # load data
 load("data/2025/processed/survey_weighted.Rdata")
+
+# define variables to segment results by
+segment_vars <- c("district", "oakland_tenure", "age", "age_group", "gender",
+                  "race_ethnicity","race_group", "education", "education_group")
 
 #### create overall summaries by question ####
 # create vector of questions
@@ -167,11 +172,71 @@ ggsave(
 )
 
 #### longitudinal ####
-# for initial discussion draft, included table only
-s_q2
-s_q3
+# define order of responses
+l_years <- c(2000, 2002, 2005, 2015, 2017, 2018, 2020, 2022, 2025)
+l_q2_responses <- c("Excellent", "Good", "Don't know", "Fair", "Poor")
+l_q3_responses <- c("Strongly approve", "Somewhat approve", 
+                    "Don't know",
+                    "Somewhat disapprove", "Strongly disapprove")
 
-# TODO: make alluvial charts for overall
+# append 2025 data
+q2_text <- "Generally speaking, how would you rate Oakland as a place to live?"
+s_q2_2025 <- s_q2 %>%
+    mutate(
+        question = "q2",
+        question_text = q2_text,
+        year = 2025
+    ) %>%
+    select(question, question_text, year, response = r_en, pct = weighted_pct) %>%
+    add_row(
+        question = "q2",
+        question_text = q2_text,
+        year = 2025,
+        response = "Don't know",
+        pct = 0
+    )
+
+d_place_to_live <- bind_rows(d_place_to_live_historical, s_q2_2025) %>%
+    mutate(
+        question_text = str_squish(question_text),
+        response = fct_relevel(response, l_q2_responses)
+    )
+
+q3_text <- "Do you approve or disapprove of the overall job being done by Oakland City government in providing services to the people who live here?"
+s_q3_2025 <- s_q3 %>%
+    mutate(
+        question = "q3",
+        question_text = q3_text,
+        year = 2025
+    ) %>%
+    select(question, question_text, year, response = r_en, pct = weighted_pct) %>%
+    add_row(
+        question = "q3",
+        question_text = q3_text,
+        year = 2025,
+        response = "Don't know",
+        pct = 0
+    )
+
+d_approval <- bind_rows(d_approval_historical, s_q3_2025) %>%
+    mutate(
+        question_text = str_squish(question_text),
+        response = fct_relevel(response, l_q3_responses)
+    )
+
+# create and save overall stacked bar chart showing change over time
+longitudinal_plots <- map(list(d_place_to_live, d_approval), plot_stacked_trend)
+q_longitudinal <- c("q2", "q3")
+
+walk2(longitudinal_plots, q_longitudinal, ~ggsave(
+    filename = paste0("output/2025/", .y, ".png"),
+    plot = .x,
+    width = 14,
+    height = 7,
+    units = "in",
+    dpi = 300
+))
+
 # TODO: segment by 
 
 #### overall bar charts ####
@@ -194,10 +259,6 @@ walk2(bar_plots, q_bar, ~ggsave(
 ))
 
 #### bar charts by segment, with overall reference ####
-# define segments
-segment_vars <- c("district", "oakland_tenure", "age", "age_group", "gender",
-                  "race_ethnicity","race_group", "education", "education_group")
-
 # create all combinations of questions and segments
 q_segment_combos <- expand_grid(q = q_bar, segment = segment_vars) 
 

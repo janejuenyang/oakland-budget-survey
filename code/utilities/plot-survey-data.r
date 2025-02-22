@@ -60,6 +60,40 @@ summarize_distributions <- function(
     return(res)
 }
 
+# Plot stacked area chart showing change in categories over time
+plot_stacked_trend <- function(df, x = "year", y = "pct", 
+    fill = "response", x_breaks = l_years){
+    
+    # create symbols for tidy evaluation
+    x_sym <- sym(x)
+    y_sym <- sym(y)
+    fill_sym <- sym(fill)
+    
+    # plot
+    res <- ggplot(
+        d = df,
+        mapping = aes(
+            x = !!x_sym,
+            y = !!y_sym
+        )) +
+        # stacked bar chart 
+        geom_area(mapping = aes(fill = !!fill_sym)) +
+        scale_fill_paletteer_d(palette = "NineteenEightyR::miami2") +
+        # vertical lines to distinguish years
+        geom_vline(
+            xintercept = x_breaks,
+            color = "white",
+            linewidth = 0.5
+        ) + 
+        # format axes
+        scale_y_continuous(labels = percent) +
+        scale_x_continuous(breaks = x_breaks) +
+        theme(legend.title = element_blank())
+    
+    # return plot
+    return(res)
+}
+
 #' Plot a distribution using a column chart
 #' 
 #' @param df A data frame containing the variables to plot
