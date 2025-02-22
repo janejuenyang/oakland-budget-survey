@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: visualize weighted responses
-# last edited: feb 7, 2025
+# last edited: feb 22, 2025
 ################################################################################
 
 #### load packages, utility functions, and data ####
@@ -22,15 +22,32 @@ load("data/2025/processed/survey_weighted.Rdata")
 # create vector of questions
 q <- d_qmap$question
 
-# calculate summary tables per question
+# calculate summary tables per question that is already by-respondent
 q %>%
     walk(
         ~assign(paste0("s_", .x),
             summarize_distributions(
                 df = d_survey %>% filter(question == .x), 
-                group_var = "r_en"
+                group_var = "r_en",
+                wt_var = "wt",
+                count_type = "n"
             ),
             envir = .GlobalEnv
+        )
+    )
+
+# for multi-select questions, re-do summary according to distinct respondents
+q_multiselect <- c("q5", "q6")
+q_multiselect %>%
+    walk(
+        ~assign(paste0("s_", .x),
+                summarize_distributions(
+                    df = d_survey %>% filter(question == .x), 
+                    group_var = "r_en",
+                    wt_var = "wt",
+                    count_type = "n_distinct"
+                ),
+                envir = .GlobalEnv
         )
     )
 
@@ -199,5 +216,9 @@ pwalk(q_segment_combos,
 # create segmented plots
 walk(q_bar, ~plot_all_segments(.x, segment_vars))
 
+
+#### weighted vs. unweighted (overall and by segment) ####
+
+#### unweighted subgroups (district, age group, people living outside) ####
 #### save objects ####
 save.image("data/2025/visualized/survey_viz.Rdata")

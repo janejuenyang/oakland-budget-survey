@@ -1,26 +1,37 @@
 ################################################################################
 # purpose: define functions for commonly-used plots 
-# last edited: feb 6, 2025
+# last edited: feb 22, 2025
 ################################################################################
 
 #' Summarize Distributions
 #'
 #' @param df Data frame containing survey responses
 #' @param group_var String naming the grouping variable
+#' @param segment_var String naming the segmentation variable (optional)
 #' @param wt_var String naming the weight variable, defaults to "wt"
+#' @param count_type String specifying count type ("n" or "n_distinct")
 #' @return Tibble with counts and weighted sums by group
 #' @examples
 #' summarize_distributions(survey_df, "age_group")
-#' summarize_distributions(survey_df, "education", "sample_weight")
-summarize_distributions <- function(df, group_var, segment_var = NULL, wt_var = "wt") {
+#' summarize_distributions(survey_df, "education", wt_var = "sample_weight")
+summarize_distributions <- function(
+        df, 
+        group_var, 
+        segment_var = NULL, 
+        wt_var = "wt",
+        count_type = c("n", "n_distinct")
+    ) {
+    # evaluate provided parameters
     group_sym <- sym(group_var)
     wt_sym <- sym(wt_var)
-    
+    count_type <- match.arg(count_type)
+
+    # calculate summary
     if (is.null(segment_var)) {
         res <- df %>%
             group_by(!!group_sym) %>%
             summarize(
-                raw_count = n(),
+                raw_count = if_else(count_type == "n", n(), n_distinct(respondent_id)),
                 weighted_count = sum(!!wt_sym),
                 .groups = "drop"
             ) %>%
@@ -34,14 +45,14 @@ summarize_distributions <- function(df, group_var, segment_var = NULL, wt_var = 
         res <- df %>%
             group_by(!!segment_sym, !!group_sym) %>%
             summarize(
-                raw_count = n(),
+                raw_count = if_else(count_type == "n", n(), n_distinct(respondent_id)),
                 weighted_count = sum(!!wt_sym),
-                .groups = "drop"
+                .groups = "keep"
             ) %>%
             group_by(!!segment_sym) %>%
             mutate(
                 raw_pct = raw_count/sum(raw_count),
-                weighted_pct = weighted_count/sum(weighted_count),
+                weighted_pct = weighted_count/sum(weighted_count)
             ) %>%
             ungroup()
     }
