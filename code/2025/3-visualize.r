@@ -237,7 +237,22 @@ walk2(longitudinal_plots, q_longitudinal, ~ggsave(
     dpi = 300
 ))
 
-# TODO: segment by 
+# create and save 2025's segmented results
+q_segment_combos <- expand_grid(q = q_longitudinal, segment = segment_vars) 
+
+pwalk(q_segment_combos,
+      ~assign(paste0("s_", .x, "_by_", .y),
+              summarize_distributions(
+                  df = d_survey %>% filter(question == .x),
+                  group_var = "r_en",
+                  segment_var = .y
+              ),
+              envir = .GlobalEnv
+      )
+)
+
+# create segmented plots
+walk(q_longitudinal, ~plot_all_segments(.x, segment_vars))
 
 #### overall bar charts ####
 # create vector of questions to plot as bar

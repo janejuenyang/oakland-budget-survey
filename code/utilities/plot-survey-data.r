@@ -89,7 +89,7 @@ plot_stacked_trend <- function(df, x = "year", y = "pct",
         scale_y_continuous(labels = percent) +
         scale_x_continuous(breaks = x_breaks) +
         theme(legend.title = element_blank())
-    
+
     # return plot
     return(res)
 }
