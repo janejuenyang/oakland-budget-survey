@@ -310,3 +310,144 @@ plot_all_segments <- function(question_id, segment_vars, env = .GlobalEnv) {
     # return objects saved in environment
     return(plots)
 }
+
+#' Extract grouping variable from dataframe name
+#'
+#' @param df_name Name of the dataframe (string)
+#' @return String containing the grouping variable name or NULL if no match
+#' @examples
+#' extract_group_var("s_q6_by_race_ethnicity")  # returns "race_ethnicity"
+#' extract_group_var("s_q6_response")           # returns NULL
+extract_group_var <- function(df_name) {
+    # match pattern after "by_"
+    match <- regexpr("by_(.+)$", df_name, perl = TRUE)
+    if (match != -1) {
+        group_var <- substr(df_name, match + 3, nchar(df_name))
+        return(group_var)
+    }
+    return(NULL)
+}
+
+#' Create a side-by-side comparison bar chart of raw vs weighted percentages
+#'
+#' @param df A dataframe containing columns: r_en (response text), raw_pct (raw percentages),
+#'        and weighted_pct (weighted percentages)
+#' @param obj_name Optional name of the object, used for saved file name
+#' @param facet Logical; if TRUE, attempts to extract faceting variable from dataframe name
+#' @param facet_label Optional label for facet strips (default: prettified facet variable name)
+#' @param title Optional plot title (default: "Raw vs Weighted Percentages")
+#' @param colors Optional vector of two colors for the bars (default: c("#1f77b4", "#ff7f0e"))
+#'
+#' @return A ggplot2 object containing the side-by-side bar chart
+#' @export
+#'
+#' @import ggplot2
+#' @import tidyr
+#' @import ggtext
+#'
+#' @examples
+#' s_q6_by_race_ethnicity <- data.frame(
+#'   r_en = c("Response A", "Response B"),
+#'   raw_pct = c(0.50, 0.50),
+#'   weighted_pct = c(0.54, 0.46),
+#'   race_ethnicity = c("Group 1", "Group 2")
+#' )
+#' # Will automatically detect and use race_ethnicity as facet variable
+#' plot_pct_comparison(s_q6_by_race_ethnicity, facet = TRUE)
+plot_pct_comparison <- function(df, obj_name = NULL, 
+                                facet = FALSE, facet_label = NULL,
+                                title = "Raw vs Weighted Percentages", 
+                                colors = c("#1f77b4", "#ff7f0e")) {
+    
+    # get name of df object
+    df_name <- if(!is.null(obj_name)) obj_name else deparse(substitute(df))
+    
+    # extract facet variable if faceting is requested
+    facet_var <- NULL
+    if (facet) {
+        facet_var <- extract_group_var(df_name)
+        
+        if (is.null(facet_var)) {
+            warning("Could not extract faceting variable from dataframe name. Expected pattern: '*by_variable'")
+            facet <- FALSE
+        } else if (!facet_var %in% names(df)) {
+            warning(sprintf("Extracted faceting variable '%s' not found in dataframe", facet_var))
+            facet <- FALSE
+        }
+    }
+    
+    # create a copy of the dataframe with only the columns we need
+    plot_df <- df[, c("r_en", "raw_pct", "weighted_pct")]
+    if (facet) {
+        plot_df[[facet_var]] <- df[[facet_var]]
+    }
+    
+    # reshape data from wide to long format
+    plot_data <- pivot_longer(
+        plot_df,
+        cols = c("raw_pct", "weighted_pct"),
+        names_to = "type",
+        values_to = "percentage"
+    )
+    
+    # create more readable labels
+    plot_data$type <- factor(
+        plot_data$type,
+        levels = c("raw_pct", "weighted_pct"),
+        labels = c("Raw", "Weighted")
+    )
+    
+    # create the base plot
+    p <- ggplot(plot_data, aes(y = r_en, x = percentage, fill = type)) +
+        geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+        geom_richtext(
+            aes(
+                label = percent(percentage, accuracy = 0.1),
+                group = type
+            ),
+            position = position_dodge(width = 0.7),
+            hjust = -0.1,
+            size = 3.5,
+            fill = NA,
+            label.color = NA
+        ) +
+        scale_fill_manual(values = colors) +
+        scale_x_continuous(labels = scales::percent) +
+        labs(
+            title = title,
+            fill = NULL
+        ) +
+        theme(
+            legend.position = "top",
+            legend.justification = "left",
+            legend.direction = "horizontal",
+        )
+    
+    # add faceting if requested and variable was successfully extracted
+    if (facet) {
+        p <- p + facet_wrap(
+            as.formula(paste("~", facet_var)),
+            strip.position = "top"
+        ) +
+            theme(
+                strip.text = element_text(face = "bold"),
+                panel.spacing = unit(2, "lines")
+            )
+    }
+    
+    # save plot
+    ggsave(
+        filename = paste0("output/2025/", str_remove(df_name, "s_"), 
+            "_raw-v-wt.png"),
+        plot = p,
+        width = 12,
+        height = 12,
+        units = "in", 
+        limitsize = FALSE
+    )
+    
+    # return plot, saved in environment
+    plot_name <- paste0("g_", str_remove(df_name, "s_"), "_raw-v-wt")
+    assign(plot_name, p, envir = .GlobalEnv)
+    return(p)
+}

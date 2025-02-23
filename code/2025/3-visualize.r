@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: visualize weighted responses
-# last edited: feb 22, 2025
+# last edited: feb 23, 2025
 ################################################################################
 
 #### load packages, utility functions, and data ####
@@ -292,9 +292,23 @@ pwalk(q_segment_combos,
 # create segmented plots
 walk(q_bar, ~plot_all_segments(.x, segment_vars))
 
+#### compare weighted vs. unweighted overall plots ####
+# get lists of overall summaries to compare: one for segmented, one for overall
+l_s_overall <- ls(pattern = "^s_q") |>
+    grep(pattern = "by", value = TRUE, invert = TRUE) |>
+    grep(pattern = "2025", value = TRUE, invert = TRUE) |>
+    # exclude screener and free-form questions
+    setdiff(c("s_q1", "s_q4", "s_q13"))
 
-#### weighted vs. unweighted (overall and by segment) ####
+l_s_segmented <- ls(pattern = "^s_") %>%
+    grep(pattern = "by", value = TRUE)
 
-#### unweighted subgroups (district, age group, people living outside) ####
+# generate comparison plots
+walk(l_s_overall, ~plot_pct_comparison(get(.x), obj_name = .))
+walk(l_s_segmented, ~plot_pct_comparison(get(.x), obj_name = ., facet = TRUE))
+
+#### plot unweighted subgroups (district, age group, people living outside) ####
+
+
 #### save objects ####
 save.image("data/2025/visualized/survey_viz.Rdata")
