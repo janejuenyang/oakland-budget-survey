@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: define functions for commonly-used plots 
-# last edited: feb 22, 2025
+# last edited: feb 23, 2025
 ################################################################################
 
 #' Summarize Distributions
@@ -260,7 +260,14 @@ plot_distribution_segmented <- function(df, x = "r_en", y = "weighted_pct",
             expand = expansion(mult = c(0, 0.1))
         ) +
         labs(title = title, subtitle = subtitle) +
-        coord_flip()
+        coord_flip() +
+        theme(
+            legend.title = element_blank(),
+            legend.position = "top",
+            legend.margin = margin(0, 0, 0, 0),
+            legend.justification.top = "left",
+            legend.justification.left = "top",
+        )
 }
 
 #' Generate, save, and store plots for all segment combinations of a question
@@ -287,7 +294,7 @@ plot_all_segments <- function(question_id, segment_vars, env = .GlobalEnv) {
             filename = paste0("output/2025/", question_id, "_by_", seg_var, ".png"),
             plot = p,
             width = 12,
-            height = 8
+            height = 12
         )
         
         # assign plot to environment with descriptive name
@@ -297,8 +304,9 @@ plot_all_segments <- function(question_id, segment_vars, env = .GlobalEnv) {
         p
     })
     
-    # Name list elements
+    # name list elements
     names(plots) <- paste0("g_", question_id, "_by_", segment_vars)
     
-    plots
+    # return objects saved in environment
+    return(plots)
 }
