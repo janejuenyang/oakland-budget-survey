@@ -3,6 +3,8 @@
 # last edited: feb 23, 2025
 ################################################################################
 
+# TODO: tidy up roxygen2 documentation
+
 #' Summarize Distributions
 #'
 #' @param df Data frame containing survey responses
@@ -92,6 +94,53 @@ plot_stacked_trend <- function(df, x = "year", y = "pct",
 
     # return plot
     return(res)
+}
+
+#' Create distribution summaries for survey responses and save to global environment
+#' 
+#' @param data Data frame containing survey responses
+#' @param filter_var Character string of column name to subset data to
+#' @param group_var Character string of column name to group by
+#' @param wt_var Column containing weights, default "wt" 
+#' @param count_type Type of count to compute, default "n"
+#' @export
+summarize_subset_distributions <- function(
+        data,
+        filter_var,
+        group_var,
+        wt_var = "wt",
+        count_type = c("n", "n_distinct")) {
+    
+    # evaluate provided parameters
+    filter_sym <- sym(filter_var)
+    #group_sym <- sym(group_var)
+    #wt_sym <- sym(wt_var)
+    count_type <- match.arg(count_type)
+    
+    subsets <- data %>%
+        pull(!!filter_var) %>%
+        unique()
+    
+    subsets %>%
+        walk(function(f) {
+            q %>%
+                walk(
+                    ~assign(
+                        paste0("s_", .x, "_", make_clean_names(f)),
+                        summarize_distributions(
+                            df = data %>% 
+                                filter(
+                                    question == .x,
+                                    !!sym(filter_sym) == f
+                                ),
+                            wt_var = wt_var,
+                            group_var = group_var,
+                            count_type = count_type
+                        ),
+                        envir = .GlobalEnv
+                    )
+                )
+        })
 }
 
 #' Plot a distribution using a column chart

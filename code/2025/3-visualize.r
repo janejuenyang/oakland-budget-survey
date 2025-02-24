@@ -7,6 +7,7 @@
 # load packages
 library(tidyverse)
 library(skimr)
+library(janitor)
 library(patchwork)
 library(scales)
 library(ggtext)
@@ -308,7 +309,54 @@ walk(l_s_overall, ~plot_pct_comparison(get(.x), obj_name = .))
 walk(l_s_segmented, ~plot_pct_comparison(get(.x), obj_name = ., facet = TRUE))
 
 #### plot unweighted subgroups (district, age group, people living outside) ####
+# summarize by subgroups of interest
+summarize_subset_distributions(
+    data = d_survey, 
+    filter_var = "district", 
+    group_var = "r_en", 
+    wt_var = "wt", 
+    count_type = "n_distinct"
+)
 
+summarize_subset_distributions(
+    data = d_survey, 
+    filter_var = "age_group", 
+    group_var = "r_en", 
+    wt_var = "wt", 
+    count_type = "n_distinct"
+)
+
+#TODO: add for people living outside
+
+# create overall plots of each
+l_s_unweighted <- ls(pattern = "^s_q\\d+_") |>
+    grep(pattern = "by", value = TRUE, invert = TRUE) |>
+    grep(pattern = "2025", value = TRUE, invert = TRUE)
+
+unweighted_plots <- l_s_unweighted %>%
+    set_names() %>%
+    map(~{
+        print(paste("Processing:", .x))
+        df_temp <- get(.x)
+        plot_distribution(df = df_temp, y = "raw_pct")
+})
+
+# Create error-tolerant version of ggsave
+safe_ggsave <- possibly(
+    .f = ggsave,
+    otherwise = NULL,
+    quiet = TRUE
+)
+
+# save plots
+walk2(unweighted_plots[87:209], l_s_unweighted[87:209], ~safe_ggsave(
+    filename = paste0("output/2025/", str_remove(.y, "s_"), "_raw.png"),
+    plot = .x,
+    width = 5,
+    height = 5,
+    units = "in",
+    dpi = 300
+))
 
 #### save objects ####
 save.image("data/2025/visualized/survey_viz.Rdata")
