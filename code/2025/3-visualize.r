@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: visualize weighted responses
-# last edited: feb 23, 2025
+# last edited: feb 24, 2025
 ################################################################################
 
 #### load packages, utility functions, and data ####
@@ -29,24 +29,24 @@ segment_vars <- c("district", "oakland_tenure", "age", "age_group", "gender",
 q <- d_qmap$question
 
 # calculate summary tables per question that is already by-respondent
-q %>%
+q |>
     walk(
-        ~assign(paste0("s_", .x),
-            summarize_distributions(
-                df = d_survey %>% filter(question == .x), 
-                group_var = "r_en",
-                wt_var = "wt",
-                count_type = "n"
-            ),
-            envir = .GlobalEnv
+        \(.x) assign(paste0("s_", .x),
+             summarize_distributions(
+                 df = d_survey |> filter(question == .x), 
+                 group_var = "r_en",
+                 wt_var = "wt",
+                 count_type = "n"
+             ),
+             envir = .GlobalEnv
         )
     )
 
 # for multi-select questions, re-do summary according to distinct respondents
 q_multiselect <- c("q5", "q6")
-q_multiselect %>%
+q_multiselect |>
     walk(
-        ~assign(paste0("s_", .x),
+        \(.x) assign(paste0("s_", .x),
                 summarize_distributions(
                     df = d_survey %>% filter(question == .x), 
                     group_var = "r_en",
@@ -253,6 +253,7 @@ pwalk(q_segment_combos,
 )
 
 # create segmented plots
+# TODO: DEBUG
 walk(q_longitudinal, ~plot_all_segments(.x, segment_vars))
 
 #### overall bar charts ####
@@ -291,7 +292,8 @@ pwalk(q_segment_combos,
 )
 
 # create segmented plots
-walk(q_bar, ~plot_all_segments(.x, segment_vars))
+# TODO: DEBUG
+walk(q_multi, ~plot_all_segments(.x, segment_vars))
 
 #### compare weighted vs. unweighted overall plots ####
 # get lists of overall summaries to compare: one for segmented, one for overall
@@ -326,7 +328,16 @@ summarize_subset_distributions(
     count_type = "n_distinct"
 )
 
-#TODO: add for people living outside
+# add for people living outside
+summarize_subset_distributions(
+    data = d_survey %>% 
+        mutate(is_unhoused_respondent = if_else(is_unhoused_respondent,
+            "living_outside", "housed")), 
+    filter_var = "is_unhoused_respondent", 
+    group_var = "r_en", 
+    wt_var = "wt", 
+    count_type = "n_distinct"
+)
 
 # create overall plots of each
 l_s_unweighted <- ls(pattern = "^s_q\\d+_") |>
@@ -349,7 +360,7 @@ safe_ggsave <- possibly(
 )
 
 # save plots
-walk2(unweighted_plots[87:209], l_s_unweighted[87:209], ~safe_ggsave(
+walk2(unweighted_plots, l_s_unweighted, ~safe_ggsave(
     filename = paste0("output/2025/", str_remove(.y, "s_"), "_raw.png"),
     plot = .x,
     width = 5,

@@ -1,7 +1,9 @@
 ################################################################################
 # purpose: structure survey data for easy analysis
-# last edited: feb 5, 2025
+# last edited: feb 23, 2025
 ################################################################################
+
+#### general cleanup ####
 
 #' @title Extract question number from survey column name
 #' @description
@@ -102,6 +104,8 @@ create_id <- function(prefix, row_numbers, total_width = 5) {
     return(id)
 }
 
+#### handle district identifiers ####
+
 #' @title Extract text that is not enclosed within parentheses
 #' @description
 #' Given text that includes parenthetical language, this function
@@ -173,6 +177,8 @@ standardize_districts <- function(df, question_id) {
     return(df_res)
 }
 
+#### handle multi-select questions ####
+
 #' @title Identify chosen multi-select response options
 #' @description
 #' Given a string containing the multi-selected 
@@ -191,8 +197,8 @@ standardize_districts <- function(df, question_id) {
 #'      more illegal dumping, reduced cleanliness, reduced sidewalk and 
 #'      bike accessibility), Feeling safe when walking and/or leaving my 
 #'      car alone"
-#' check_responses(response, options) # returns FALSE  TRUE  TRUE
-check_responses <- function(response_text, options) {
+#' check_standard_options(response, options) # returns FALSE  TRUE  TRUE
+check_standard_options <- function(response_text, options) {
     # handle NA values
     if (is.na(response_text)) {
         return(rep(FALSE, length(options)))
@@ -202,6 +208,59 @@ check_responses <- function(response_text, options) {
     # use fixed() to ensure exact string matching
     res <- map_lgl(options, ~str_detect(response_text, fixed(.x)))
     return(res)
+}
+
+#' @title Extract write-in responses
+#' @description Helper function to extract portions of the response that
+#' don't match any standard options
+#' @param response_text The full response string
+#' @param options Vector of standard options to remove
+#' @returns A character vector of write-in responses
+extract_write_ins <- function(response_text, options) {
+    # input validation
+    if (is.language(response_text)) {
+        response_text <- rlang::as_string(response_text)
+    } else if (!is.character(response_text)) {
+        cli::cli_abort("response_text must be a character string or quoted expression")
+    }
+    
+    if (!is.character(options)) {
+        cli::cli_abort("options must be a character vector")
+    }
+    
+    # start with the full response string
+    remaining_text <- response_text
+    
+    # remove each standard option
+    for (opt in options) {
+        remaining_text <- str_replace(remaining_text, fixed(opt), "")
+    }
+    
+    # clean up the remaining text
+    write_ins <- remaining_text %>%
+        # remove leading/trailing commas and whitespace
+        str_replace_all(",{2,}", ",") %>%
+        str_trim() %>%
+        str_remove_all("^,|,$") %>%
+        str_trim()
+
+    # handle empty strings after cleaning
+    if (is.null(write_ins) || is.na(write_ins) || nchar(write_ins) == 0) {
+        return(character(0))
+    }
+    
+    # split any remaining responses and clean them: assumes comma separator
+    if (nchar(write_ins) > 0) {
+
+            split_responses <- str_split(write_ins, ",")[[1]] %>%
+            map_chr(str_trim)
+        
+        # Filter out empty strings using base R
+        split_responses[nchar(split_responses) > 0]
+
+    } else {
+        character(0)
+    }
 }
 
 #' @title Separate multi-select responses into separate rows
@@ -249,28 +308,47 @@ separate_multi_select <- function(df, col, options) {
         stop("Argument `options` must be a vector")
     }
     
-    # transform data
-    df_res <- df %>%
+    # transform standard response data
+    df_standard <- df %>%
         # process each row individually
         rowwise() %>%
         mutate(
             # create list column of logical vectors showing selected options
-            selections = list(check_responses(get(col), options))
+            selections = list(check_standard_options(get(col), options))
         ) %>% 
         # expand the selections into individual rows
         unnest_longer(selections) %>%
         # add the corresponding option text
         mutate(
             {{col}} := options[row_number() %% length(options) + 
-                (row_number() %% length(options) == 0) * length(options)]
+                (row_number() %% length(options) == 0) * length(options)],
+            is_writein = FALSE
         ) %>%
         # keep only the selected options
         filter(selections) %>%
         select(-selections)
+    
+    # handle write-in response data
+    df_write_ins <- df %>%
+        rowwise() %>%
+        mutate(
+            write_ins = list(extract_write_ins(get(col), options))
+        ) %>%
+        unnest_longer(write_ins) %>%
+        mutate(
+            {{col}} := write_ins, 
+            is_writein = TRUE
+        ) %>%
+        select(-write_ins)
+    
+    # combine standard and write-in responses
+    df_res <- bind_rows(df_standard, df_write_ins)
 
     # return expanded survey dataframe    
     return(df_res)
 }
+
+#### create final analysis format ####
 
 #' @title Reshape survey data from wide to long format
 #' #' @description
@@ -398,6 +476,8 @@ map_en_responses <- function(df, language_code = c("en", "es", "zh")) {
     return(df_res)
 }
 
+#### put it all together ####
+
 #' Preprocess Survey Data with Multi-language and Multi-select Support
 #' 
 #' @description
@@ -523,6 +603,7 @@ preprocess_survey_data <- function(
         # function to process a single multi-select question
         process_one_question <- function(df, qid, options) {
             # only process rows for this specific question
+            print(paste("Processing:", qid))
             df_question <- df %>%
                 filter(.data$question == qid)
             

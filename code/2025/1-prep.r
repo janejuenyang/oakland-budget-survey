@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: prep data for fy25-27 oakland, ca resident budget priorities survey
-# last edited: feb 5, 2025
+# last edited: feb 18, 2025
 ################################################################################
 
 #### load packages and utility functions ####
@@ -49,7 +49,7 @@ l_q2_responses <- c("Excellent", "Good", "Fair", "Poor", "Don't know")
 l_q3_responses <- c("Strongly approve", "Somewhat approve", 
     "Somewhat disapprove", "Strongly disapprove", "Don't know")
 
-d_place_to_live <- tibble(
+d_place_to_live_historical <- tibble(
     question = "q2",
     question_text = "Generally speaking, how would you rate Oakland as a place 
         to live?",
@@ -67,7 +67,7 @@ d_place_to_live <- tibble(
     )
 )
 
-d_approval <- tibble(
+d_approval_historical <- tibble(
     question = "q3",
     question_text = " Do you approve or disapprove of the overall job being
         done by Oakland City government in providing services to the people who 
@@ -194,6 +194,9 @@ d_survey_en <- d_survey_raw_en %>%
             question == "q7" & 
                 r_en == "Expand the use of civilian teams, instead of police, to respond to calls where no threat or harm" ~
                 "Use more civilian staff - not sworn police officers - to respond to calls",
+            question == "q7" &
+                r_en == "Use of civilian staff - not sworn police officers - to respond to calls" ~
+                "Use more civilian staff - not sworn police officers - to respond to calls",
             question == "q8" & 
                 r_en == "Reduce funding for cultural programs" ~
                 "Reduce funding for cultural programs and art organizations",
@@ -246,6 +249,11 @@ d_survey_other_responses_grouped <- d_survey_combined %>%
             question %in% q_other & !(r_en %in% d_rmap$r_en[d_rmap$question %in% q_other]),
             "Other Response",
             r_en
+        ),
+        is_writein = case_when(
+            !is.na(is_writein) ~ is_writein,
+            !is.na(other_detail) & r_en == "Other Response" ~ TRUE,
+            TRUE ~ FALSE
         )
     )
 
@@ -278,6 +286,11 @@ d_survey <- d_survey_other_responses_grouped %>%
         district = str_replace(district, "第", "District"),
         district = str_replace(district, " 区", ""),
     ) %>%
+    mutate(
+        # flag responses from people living outside (collected on paper, entered
+        # after online responses were closed)
+        is_unhoused_respondent = timestamp > ymd("2025-02-06")
+    ) %>%
     # rename demographic columns
     rename(
         oakland_tenure = q15,
@@ -288,9 +301,10 @@ d_survey <- d_survey_other_responses_grouped %>%
     ) %>%
     # reorder columns
     select(
-        timestamp, respondent_id, question, response, other_detail, response_id,
-        survey_language, starts_with("r_"),
+        timestamp, respondent_id, is_unhoused_respondent, question, response, 
+        is_writein, other_detail, response_id, survey_language, starts_with("r_"),
         district, oakland_tenure, age, race_ethnicity, gender, education,
+        ends_with("_group")
     )
 
 # save combined response dataframe as .csv and .Rdata with other dataframes

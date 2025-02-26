@@ -24,38 +24,41 @@ summarize_distributions <- function(
         count_type = c("n", "n_distinct")
     ) {
     # evaluate provided parameters
-    group_sym <- sym(group_var)
-    wt_sym <- sym(wt_var)
     count_type <- match.arg(count_type)
+    
+    # calculate number of respondents
+    n_respondents <- length(unique(df$respondent_id))
 
-    # calculate summary
+    # # calculate summary
     if (is.null(segment_var)) {
-        res <- df %>%
-            group_by(!!group_sym) %>%
-            summarize(
+        res <- df |>
+            group_by(across(all_of(group_var))) |>
+            summarise(
                 raw_count = if_else(count_type == "n", n(), n_distinct(respondent_id)),
-                weighted_count = sum(!!wt_sym),
+                weighted_count = sum(get(wt_var)),
                 .groups = "drop"
-            ) %>%
+            ) |>
             mutate(
-                raw_pct = raw_count/sum(raw_count),
-                weighted_pct = weighted_count/sum(weighted_count)
+                raw_pct = raw_count/if_else(count_type == "n", sum(raw_count),
+                    n_respondents),
+                weighted_pct = weighted_count/if_else(count_type == "n", 
+                    sum(weighted_count), n_respondents)
             )
     } else {
-        segment_sym <- sym(segment_var)
-        
-        res <- df %>%
-            group_by(!!segment_sym, !!group_sym) %>%
-            summarize(
+        res <- df |>
+            group_by(across(all_of(c(segment_var, group_var)))) |>
+            summarise(
                 raw_count = if_else(count_type == "n", n(), n_distinct(respondent_id)),
-                weighted_count = sum(!!wt_sym),
-                .groups = "keep"
-            ) %>%
-            group_by(!!segment_sym) %>%
+                weighted_count = sum(get(wt_var)),
+                .groups = "drop"
+            ) |>
+            group_by(across(all_of(segment_var))) |>
             mutate(
-                raw_pct = raw_count/sum(raw_count),
-                weighted_pct = weighted_count/sum(weighted_count)
-            ) %>%
+                raw_pct = raw_count/if_else(count_type == "n", sum(raw_count),
+                    n_respondents),
+                weighted_pct = weighted_count/if_else(count_type == "n", 
+                    sum(weighted_count), n_respondents)
+            ) |>
             ungroup()
     }
     
@@ -237,7 +240,7 @@ plot_distribution_segmented <- function(df, x = "r_en", y = "weighted_pct",
     segment_sym <- sym(segment_var)
     
     # prepare data
-    plot_data <- df %>%
+    plot_data <- df |>
         mutate(
             !!x_sym := fct_reorder(!!x_sym, !!y_sym),
             label_pos = if_else(!!y_sym < threshold, 
@@ -249,10 +252,11 @@ plot_distribution_segmented <- function(df, x = "r_en", y = "weighted_pct",
         )
     
     # get overall distribution for reference
-    overall_dist <- plot_data %>%
-        group_by(!!x_sym) %>%
+    overall_dist <- plot_data |>
+        group_by(across(all_of(x))) |>
         summarize(
-            reference_pct = mean(!!y_sym),
+            # TODO: generalize weight
+            reference_pct = weighted.mean(get(y), weighted_count),
             .groups = "drop"
         )
     
@@ -276,8 +280,6 @@ plot_distribution_segmented <- function(df, x = "r_en", y = "weighted_pct",
         # Reference line segments
         geom_segment(
             data = overall_dist,
-            # aes(x = 0, xend = reference_pct,
-            #     y = as.numeric(!!x_sym), yend = as.numeric(!!x_sym)),
             aes(
                 x = as.numeric(!!x_sym) - 0.45,
                 xend = as.numeric(!!x_sym) + 0.45,
