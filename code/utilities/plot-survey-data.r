@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: define functions for commonly-used plots 
-# last edited: feb 23, 2025
+# last edited: mar 1, 2025
 ################################################################################
 
 # TODO: tidy up roxygen2 documentation
@@ -254,8 +254,7 @@ plot_distribution_segmented <- function(df, x = "r_en", y = "weighted_pct",
     # get overall distribution for reference
     overall_dist <- plot_data |>
         group_by(across(all_of(x))) |>
-        summarize(
-            # TODO: generalize weight
+        dplyr::summarize(
             reference_pct = weighted.mean(get(y), weighted_count),
             .groups = "drop"
         )
