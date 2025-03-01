@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: prep data for fy25-27 oakland, ca resident budget priorities survey
-# last edited: feb 18, 2025
+# last edited: mar 1, 2025
 ################################################################################
 
 #### load packages and utility functions ####
@@ -88,6 +88,7 @@ d_approval_historical <- tibble(
 
 # save all raw survey data
 save(d_survey_raw_en, d_survey_raw_es, d_survey_raw_zh, 
+     d_place_to_live_historical, d_approval_historical,
      file = "data/2025/raw/survey_raw.RData")
 
 #### identify questions that require special handling in surveys ####
@@ -308,7 +309,7 @@ d_survey <- d_survey_other_responses_grouped %>%
     )
 
 # save combined response dataframe as .csv and .Rdata with other dataframes
-save(d_survey, d_place_to_live, d_approval,d_qmap, d_rmap,
+save(d_survey, d_place_to_live_historical, d_approval_historical,d_qmap, d_rmap,
      file = "data/2025/processed/survey_processed.RData")
 write_csv(d_survey, file = "data/2025/processed/survey_processed.csv")
 

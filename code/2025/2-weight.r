@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: establish and apply weights to survey dataset
-# last edited: feb 6, 2025
+# last edited: mar 1, 2025
 # reference: https://www.census.gov/quickfacts/fact/table/oaklandcitycalifornia/PST045223
 # methodology note on raking: https://www.pewresearch.org/methods/2018/01/26/for-weighting-online-opt-in-samples-what-matters-most/
 ################################################################################
@@ -145,7 +145,7 @@ d_survey <- d_survey %>%
 
 # save data
 save(d_survey, d_respondents,
-     d_place_to_live, d_approval,
+     d_place_to_live_historical, d_approval_historical,
      d_qmap, d_rmap,
      distributions,
      file = "data/2025/processed/survey_weighted.RData")
