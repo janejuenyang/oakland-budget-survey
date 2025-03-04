@@ -1,6 +1,6 @@
 ################################################################################
 # purpose: visualize weighted responses
-# last edited: feb 24, 2025
+# last edited: mar 1, 2025
 ################################################################################
 
 #### load packages, utility functions, and data ####
@@ -253,7 +253,6 @@ pwalk(q_segment_combos,
 )
 
 # create segmented plots
-# TODO: DEBUG
 walk(q_longitudinal, ~plot_all_segments(.x, segment_vars))
 
 #### overall bar charts ####
@@ -275,6 +274,17 @@ walk2(bar_plots, q_bar, ~ggsave(
     dpi = 300
 ))
 
+# resize q6 to avoid y-axis text squish
+bar_plots[[2]] <- plot_distribution((s_q6))
+ggsave(
+    filename = "output/2025/q6.png",
+    plot = bar_plots[[2]],
+    width = 12,
+    height = 8,
+    units = "in",
+    dpi = 300
+)
+
 #### bar charts by segment, with overall reference ####
 # create all combinations of questions and segments
 q_segment_combos <- expand_grid(q = q_bar, segment = segment_vars) 
@@ -292,8 +302,7 @@ pwalk(q_segment_combos,
 )
 
 # create segmented plots
-# TODO: DEBUG
-walk(q_multi, ~plot_all_segments(.x, segment_vars))
+walk(q_bar, ~plot_all_segments(.x, segment_vars))
 
 #### compare weighted vs. unweighted overall plots ####
 # get lists of overall summaries to compare: one for segmented, one for overall
@@ -363,8 +372,8 @@ safe_ggsave <- possibly(
 walk2(unweighted_plots, l_s_unweighted, ~safe_ggsave(
     filename = paste0("output/2025/", str_remove(.y, "s_"), "_raw.png"),
     plot = .x,
-    width = 5,
-    height = 5,
+    width = 12,
+    height = 8,
     units = "in",
     dpi = 300
 ))
